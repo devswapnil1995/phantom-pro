@@ -425,7 +425,7 @@ app.get('/api/auth/status', (req, res) => {
 });
 
 // ── Auth: Start OAuth flow — Step 1: generate consent
-// Requires redirect URL http://localhost:3000/auth/callback set in Dhan Web
+// Requires redirect URL https://phantom-pro-production.up.railway.app/auth/callback set in Dhan Web
 app.post('/api/auth/start', async (req, res) => {
   if (!creds.clientId || !creds.apiKey || !creds.apiSecret)
     return res.status(400).json({ success: false, msg: 'Save clientId, API key and secret first' });
@@ -450,7 +450,7 @@ app.post('/api/auth/start', async (req, res) => {
 
 // ── Auth: OAuth callback — Step 3: consume consent and store token
 // Dhan redirects here: GET /auth/callback?tokenId=...
-// Set redirect URL = http://localhost:3000/auth/callback in Dhan Web API key settings
+// Set redirect URL = https://phantom-pro-production.up.railway.app/auth/callback in Dhan Web API key settings
 app.get('/auth/callback', async (req, res) => {
   const { tokenId } = req.query;
   if (!tokenId) return res.send('<h2>Error: tokenId missing from callback</h2>');
