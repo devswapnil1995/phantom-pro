@@ -92,6 +92,7 @@ const DEFAULTS = {
   'BANKNIFTY': { securityId: '25',   exchangeSegment: 'IDX_I',  instrument: 'INDEX'  },
   'FINNIFTY':  { securityId: '27',   exchangeSegment: 'IDX_I',  instrument: 'INDEX'  },
   'MIDCPNIFTY':{ securityId: '442',  exchangeSegment: 'IDX_I',  instrument: 'INDEX'  },
+  'SENSEX':    { securityId: '1',    exchangeSegment: 'BSE_IDX', instrument: 'INDEX'  },
   'HDFCBANK':  { securityId: '1333', exchangeSegment: 'NSE_EQ', instrument: 'EQUITY' },
 };
 
@@ -106,9 +107,10 @@ function loadScripMaster() {
 
   // Map CSV segment codes to Dhan API values
   const SEG_MAP = {
-    'NSE|E': { exchangeSegment: 'NSE_EQ', instrument: 'EQUITY' },
-    'NSE|I': { exchangeSegment: 'IDX_I',  instrument: 'INDEX'  },
-    'BSE|E': { exchangeSegment: 'BSE_EQ', instrument: 'EQUITY' },
+    'NSE|E': { exchangeSegment: 'NSE_EQ',  instrument: 'EQUITY' },
+    'NSE|I': { exchangeSegment: 'IDX_I',   instrument: 'INDEX'  },
+    'BSE|E': { exchangeSegment: 'BSE_EQ',  instrument: 'EQUITY' },
+    'BSE|I': { exchangeSegment: 'BSE_IDX', instrument: 'INDEX'  },
     // Skip NSE|D (F&O), BSE|D, NSE|C (currency) etc.
   };
 

@@ -586,7 +586,7 @@ tbody td{padding:7px 10px;font-size:10px;white-space:nowrap}
           <div class="fl"><label>Capital ₹</label><input id="cfgCap" type="number" value="200000" step="10000"/></div>
           <div class="fl"><label>Risk Per Trade %</label><input id="cfgRisk" type="number" value="0.5" step="0.25" min="0.1" max="3"/></div>
           <div class="fl"><label>Max Concurrent</label>
-            <select id="cfgMax"><option value="1">1</option><option value="2">2</option><option value="3" selected>3</option><option value="5">5</option></select></div>
+            <select id="cfgMax"><option value="1">1</option><option value="2">2</option><option value="3" selected>3</option><option value="5">5</option><option value="20">20</option></select></div>
           <div class="fl"><label>Min Confidence</label>
             <select id="cfgMinConf"><option value="2">40%+</option><option value="3" selected>60%+</option><option value="4">80%+</option></select></div>
         </div>
@@ -637,6 +637,13 @@ const p2=n=>String(n).padStart(2,'0');
 const f1=n=>parseFloat(n).toLocaleString('en-IN',{minimumFractionDigits:1,maximumFractionDigits:1});
 const fM=n=>{const a=Math.abs(n);return (n<0?'-':'')+'₹'+a.toLocaleString('en-IN',{maximumFractionDigits:0});};
 const sl=ms=>new Promise(r=>setTimeout(r,ms));
+
+// ══════════════════════════════════════════════════════════
+//  API BASE — auto-detects local vs production
+// ══════════════════════════════════════════════════════════
+const API_BASE = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+  ? ''   // relative → hits localhost:3000
+  : 'https://phantom-pro-production.up.railway.app';
 
 // ══════════════════════════════════════════════════════════
 //  GLOBAL STATE — Single source of truth
@@ -717,7 +724,7 @@ async function pollLtp(){
   const syms=[...new Set([...activeTrades().map(t=>t.sym),...S.watchlist])];
   if(!syms.length) return;
   try{
-    const r=await fetch('https://phantom-pro-production.up.railway.app/api/ltp',{
+    const r=await fetch(`${API_BASE}/api/ltp`,{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({symbols:syms})
     });
@@ -834,7 +841,7 @@ function syncCfgUI(){
   sv('tgDir',c.tgDir); sv('tgDup',c.tgDup);
   if(c.tgTok&&c.tgCid) setTgSt('ready');
   // Check live auth status from server on load
-  fetch('https://phantom-pro-production.up.railway.app/api/auth/status').then(r=>r.json()).then(d=>{
+  fetch(`${API_BASE}/api/auth/status`).then(r=>r.json()).then(d=>{
     if(d.connected){
       setApiSt('Connected · '+d.clientId+' (expires '+new Date(d.expiresAt).toLocaleDateString('en-IN')+')','ok');
       document.getElementById('modePill').textContent='LIVE';
@@ -856,7 +863,7 @@ function saveApi(){
   if(!clientId||!apiKey||!apiSecret){ toast('Fill Client ID, API Key and API Secret','fail'); return; }
   S.cfg.clientId=clientId; S.cfg.apiKey=apiKey; S.cfg.apiSecret=apiSecret;
   save();
-  fetch('https://phantom-pro-production.up.railway.app/api/auth/save',{
+  fetch(`${API_BASE}/api/auth/save`,{
     method:'POST', headers:{'Content-Type':'application/json'},
     body:JSON.stringify({clientId,apiKey,apiSecret})
   }).then(r=>r.json()).then(d=>{
@@ -870,7 +877,7 @@ function saveManualToken(){
   const token=document.getElementById('cfgTok').value.trim();
   if(!clientId||!token){ toast('Fill Client ID and token','fail'); return; }
   S.cfg.clientId=clientId; save();
-  fetch('https://phantom-pro-production.up.railway.app/api/auth/manual',{
+  fetch(`${API_BASE}/api/auth/manual`,{
     method:'POST', headers:{'Content-Type':'application/json'},
     body:JSON.stringify({clientId,token})
   }).then(r=>r.json()).then(d=>{
@@ -885,7 +892,7 @@ async function connectOAuth(){
   if(!clientId||!apiKey||!apiSecret){ toast('Save credentials first','fail'); return; }
   setApiSt('Starting OAuth flow…','warn');
   try{
-    const r=await fetch('https://phantom-pro-production.up.railway.app/api/auth/start',{
+    const r=await fetch(`${API_BASE}/api/auth/start`,{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({clientId,apiKey,apiSecret})
     });
@@ -918,7 +925,7 @@ function setApiSt(msg,type=''){
 async function testApi(){
   setApiSt('Testing…','warn');
   try {
-    const r=await fetch('https://phantom-pro-production.up.railway.app/api/test-dhan',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
+    const r=await fetch(`${API_BASE}/api/test-dhan`,{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
     const data=await r.json();
     if(r.ok && data.success){
       setApiSt('Connected ✓ · '+data.clientId+' (expires '+new Date(data.expiresAt).toLocaleDateString('en-IN')+')','ok');
@@ -1193,7 +1200,7 @@ function buildSignal(sym, bars){
 async function getBars(sym){
   // Always call backend — backend decides live vs simulation based on stored credentials
   try {
-    const response=await fetch('https://phantom-pro-production.up.railway.app/api/dhan-bars',{
+    const response=await fetch(`${API_BASE}/api/dhan-bars`,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({symbol:sym,interval:S.cfg.tf+'m',limit:100})
@@ -1785,3 +1792,5 @@ function resetAll(){
 </script>
 </body>
 </html>
+
+
